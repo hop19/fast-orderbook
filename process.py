@@ -1,6 +1,3 @@
-Usage example (see `process.py` for most update to date version):
-
-```python
 import boto3
 from numba.typed import List
 
@@ -26,4 +23,3 @@ events = convert_tardis(pd.read_csv(
 ))
 buf.extend(collect_metrics(book, events))
 df = numba_metrics_to_df(buf)
-```
