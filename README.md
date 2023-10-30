@@ -1,17 +1,28 @@
 Usage example:
 
 ```python
+import boto3
 from numba.typed import List
 
 from orderbook import Orderbook, collect_metrics, metrics_tup_ty 
 from services import *
 
-tick_size, lot_size = 0.0001, 0.01
+session = boto3.session.Session()
+s3 = session.resource('s3')
+
+# Perp metadata and initialise Orderbook object + metrics buffer
+sym, d = 'BTCUSDT', '2023-10-01'
+
+binfo = bnc_fut_universe_trading_param(bnc_fut_info())
+tick_size, lot_size = binfo[sym]['tick_size'], binfo[sym]['lot_size']
 book = Orderbook(tick_size, lot_size)
 buf = List.empty_list(metrics_tup_ty, allocated=100_000)
 
-events = convert_tardis(pd.read_csv( f'{sym}-{d}.csv.gz', compression='gzip'))
+# Fetch a day of BTC raw diff and process it
+events = convert_tardis(pd.read_csv(
+    f's3://{BUCKET}/tardis-incremental-book/{d}/{sym}.csv.gz',
+    compression='gzip',
+))
 buf.extend(collect_metrics(book, events))
-
 df = numba_metrics_to_df(buf)
 ```

@@ -1,5 +1,7 @@
+boto3
 numba
 numpy
 pandas
 requests
+s3fs
 toolz
